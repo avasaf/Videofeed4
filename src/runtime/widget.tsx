@@ -194,7 +194,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       background-color: ${config.widgetBackgroundColor};
       .main-button-wrapper {
         display: inline-flex;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: center;
         height: 32px;
         padding: 0 8px 0 12px;
@@ -211,6 +211,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
         flex-shrink: 0;
         color: ${config.dropdownArrowColor};
         fill: ${config.dropdownArrowColor};
+        margin-left: 10px;
+      }
+      .dropdown-wrapper {
+        position: relative;
+        height: 32px;
       }
       .dropdown-menu-container {
         background-color: ${config.dropdownSectionBackgroundColor};
@@ -247,14 +252,14 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       <div className='video-feed-widget' css={this.getStyle(theme)}>
         {!expanded && (
           <>
-            <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 2, display: 'flex', alignItems: 'flex-start' }}>
+            <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 2, display: 'flex', alignItems: 'center' }}>
               {feeds.length > 1 && (
-                <div style={{ marginRight: 10 }}>
+                <div className='dropdown-wrapper' style={{ marginRight: 10 }}>
                   <div className='main-button-wrapper' onClick={this.toggleMenu} role='button' aria-expanded={menuOpen}>
                     <span className='button-text-label'>{feeds[current]?.name || 'Select feed'}</span>
                     <Icon className='button-icon' icon={dropdownIconSvg} />
                   </div>
-                  <Collapse isOpen={menuOpen}>
+                  <Collapse isOpen={menuOpen} style={{ position: 'absolute', top: '100%', left: 0, right: 0 }}>
                     <div className='dropdown-menu-container'>
                       {feeds.filter(f => f.name && f.url).map((f, i) => (
                         <Button key={i} type='tertiary' className='dropdown-item-button' onClick={() => this.selectFeed(i)}>
@@ -265,20 +270,26 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
                   </Collapse>
                 </div>
               )}
-              <button
-                style={{
-                  background: config.expandButtonBackgroundColor,
-                  color: config.expandButtonIconColor,
-                  borderRadius: `${config.expandButtonBorderRadius}px`
-                }}
-                onClick={this.toggleExpand}
-              >⛶</button>
+              {feeds.length > 1 && (
+                <button
+                  style={{
+                    background: config.expandButtonBackgroundColor,
+                    color: config.expandButtonIconColor,
+                    borderRadius: `${config.expandButtonBorderRadius}px`,
+                    height: 32,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  onClick={this.toggleExpand}
+                >⛶</button>
+              )}
             </div>
-            <video
-              ref={this.videoRef}
-              controls
-              autoPlay
-              muted
+          <video
+            ref={this.videoRef}
+            controls
+            autoPlay
+            muted
               style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, borderRadius: 'inherit' }}
             />
             {feeds.length === 0 && (
@@ -300,7 +311,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               background: config.popupBackgroundColor,
               zIndex: 1000,
               display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(30%, 1fr))',
               gridAutoRows: '1fr',
               gap: `${config.popupGap}px`,
               padding: `${config.popupPadding}px`,
@@ -321,7 +332,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               onClick={this.toggleExpand}
             >×</button>
             {feeds.map((feed, i) => (
-              <div key={i} style={{ padding: `${config.popupItemPadding}px`, overflow: 'hidden', borderRadius: `${config.popupBorderRadius}px` }}>
+              <div key={i} style={{ padding: `${config.popupItemPadding}px`, overflow: 'hidden', borderRadius: `${config.popupBorderRadius}px`, position: 'relative' }}>
                 <video
                   ref={el => { this.gridVideos[i] = el }}
                   controls
@@ -329,6 +340,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
                   muted
                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
                 />
+                <div style={{ position: 'absolute', top: 5, left: 5, background: 'rgba(0,0,0,0.6)', color: '#fff', padding: '2px 4px', borderRadius: 4, pointerEvents: 'none' }}>{feed.name}</div>
               </div>
             ))}
           </div>

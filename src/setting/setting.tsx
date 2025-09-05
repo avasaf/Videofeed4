@@ -28,7 +28,7 @@ const getSettingStyles = (theme: ThemeVariables) => css`
     position: relative;
   }
   .feed-group .jimu-input {
-    margin-bottom: 12px;
+    margin-bottom: 20px;
   }
   .feed-input {
     width: 100%;
