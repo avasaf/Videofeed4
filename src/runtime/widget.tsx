@@ -96,6 +96,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       }
     } else {
       videoElement.src = url
+      videoElement.load()
+      videoElement.play().catch(() => { console.warn('Browser prevented autoplay.') })
     }
   }
 
@@ -141,16 +143,54 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
         {!expanded && (
           <>
             {feeds.length > 1 && (
-              <select
-                style={{ position: 'absolute', top: 10, left: 10, zIndex: 2 }}
-                value={current}
-                onChange={e => this.setState({ current: parseInt(e.target.value) })}
-              >
-                {feeds.map((f, i) => (<option key={i} value={i}>{f.name || `Feed ${i + 1}`}</option>))}
-              </select>
+              <>
+                <style>{`
+                  .video-feed-widget select option {
+                    background: ${config.dropdownSectionBackgroundColor};
+                    color: ${config.dropdownSectionTextColor};
+                    border-radius: ${config.dropdownSectionBorderRadius}px;
+                  }
+                  .video-feed-widget select option:hover {
+                    color: ${config.dropdownSectionHoverTextColor};
+                  }
+                `}</style>
+                <select
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    left: 10,
+                    zIndex: 2,
+                    background: config.dropdownBackgroundColor,
+                    color: config.dropdownTextColor,
+                    borderRadius: `${config.dropdownBorderRadius}px`,
+                    padding: '4px 24px 4px 8px',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg fill='${encodeURIComponent(config.dropdownArrowColor)}' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4z'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 4px center',
+                    backgroundSize: '12px'
+                  }}
+                  value={current}
+                  onChange={e => this.setState({ current: parseInt(e.target.value) })}
+                >
+                  {feeds.map((f, i) => (
+                    <option key={i} value={i}>{f.name || `Feed ${i + 1}`}</option>
+                  ))}
+                </select>
+              </>
             )}
             <button
-              style={{ position: 'absolute', top: 10, right: 10, zIndex: 2 }}
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                zIndex: 2,
+                background: config.expandButtonBackgroundColor,
+                color: config.expandButtonIconColor,
+                borderRadius: `${config.expandButtonBorderRadius}px`
+              }}
               onClick={this.toggleExpand}
             >⛶</button>
             <video
@@ -176,14 +216,25 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               left: '10%',
               width: '80%',
               height: '80%',
-              background: '#000',
+              background: config.popupBackgroundColor,
               zIndex: 1000,
               display: 'flex',
-              flexWrap: 'wrap'
+              flexWrap: 'wrap',
+              gap: `${config.popupGap}px`,
+              padding: `${config.popupPadding}px`,
+              borderRadius: `${config.popupBorderRadius}px`
             }}
           >
             <button
-              style={{ position: 'absolute', top: 10, right: 10, zIndex: 1001 }}
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                zIndex: 1001,
+                background: config.expandButtonBackgroundColor,
+                color: config.expandButtonIconColor,
+                borderRadius: `${config.expandButtonBorderRadius}px`
+              }}
               onClick={this.toggleExpand}
             >×</button>
             {feeds.map((feed, i) => (
@@ -193,7 +244,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
                 controls
                 autoPlay
                 muted
-                style={{ flex: '1 0 50%', maxHeight: '50%', objectFit: 'cover' }}
+                style={{ flex: '1 0 50%', maxHeight: '50%', objectFit: 'cover', padding: `${config.popupItemPadding}px` }}
               />
             ))}
           </div>

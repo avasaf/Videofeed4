@@ -1,3 +1,5 @@
 export default {
-    videoUrl: 'Video Feeds'
+  videoUrl: 'Video Feeds',
+  advanced: 'Advanced',
+  advancedStyling: 'Advanced Styling'
 }
