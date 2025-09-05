@@ -1,22 +1,25 @@
 /** @jsx jsx */
 import { React, AllWidgetProps, jsx, css, type IMThemeVariables, type SerializedStyles } from 'jimu-core'
+import { Button, Collapse, Icon } from 'jimu-ui'
+import dropdownIconSvg from '../../icon.svg'
 import { type IMConfig } from '../config'
 import Hls from './lib/hls.min.js'
 
 interface State {
   current: number
   expanded: boolean
+  menuOpen: boolean
 }
 
 export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>, State> {
   private readonly videoRef: React.RefObject<HTMLVideoElement>
-  private hls: Hls
+  private hls: Hls | null
   private gridVideos: HTMLVideoElement[] = []
   private gridHls: Hls[] = []
 
   constructor (props) {
     super(props)
-    this.state = { current: 0, expanded: false }
+    this.state = { current: 0, expanded: false, menuOpen: false }
     this.videoRef = React.createRef()
     this.hls = null
   }
@@ -47,6 +50,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
   componentWillUnmount (): void {
     this.cleanupPlayer()
     this.cleanupGrid()
+  }
+
+  private appendQuery (url: string): string {
+    const q = this.props.config.authQueryString
+    if (!q) return url
+    return url.includes('?') ? `${url}&${q}` : `${url}?${q}`
   }
 
   private cleanupPlayer (): void {
@@ -81,10 +90,17 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
 
   private initializeHls (url: string, videoElement: HTMLVideoElement, store: boolean): void {
     if (!url || !videoElement) return
+    const src = this.appendQuery(url)
 
-    if (url.includes('.m3u8') && Hls.isSupported()) {
-      const hls = new Hls()
-      hls.loadSource(url)
+    if (src.includes('.m3u8') && Hls.isSupported()) {
+      const hls = new Hls({
+        xhrSetup: (xhr, url) => {
+          const newUrl = this.appendQuery(url)
+          xhr.open('GET', newUrl, true)
+        }
+      })
+      hls.loadSource(src)
+
       hls.attachMedia(videoElement)
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         videoElement.play().catch(() => { console.warn('Browser prevented autoplay.') })
@@ -95,7 +111,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
         this.hls = hls
       }
     } else {
-      videoElement.src = url
+      videoElement.src = src
       videoElement.load()
       videoElement.play().catch(() => { console.warn('Browser prevented autoplay.') })
     }
@@ -103,6 +119,14 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
 
   private toggleExpand = (): void => {
     this.setState({ expanded: !this.state.expanded })
+  }
+
+  private toggleMenu = (): void => {
+    this.setState({ menuOpen: !this.state.menuOpen })
+  }
+
+  private selectFeed = (index: number): void => {
+    this.setState({ current: index, menuOpen: false })
   }
 
   getStyle (theme: IMThemeVariables): SerializedStyles {
@@ -123,6 +147,42 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       return css`
         ${baseStyle};
         border: 1px solid ${theme.colors.border};
+        .main-button-wrapper {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          height: 32px;
+          padding: 0 8px 0 12px;
+          cursor: pointer;
+          border-radius: 2px;
+          background-color: ${theme.surfaces[1].bg};
+          border: 1px solid ${theme.colors.border};
+          color: ${theme.body.color};
+        }
+        .main-button-wrapper .jimu-icon {
+          color: ${theme.body.color};
+          fill: ${theme.body.color};
+        }
+        .dropdown-menu-container {
+          background-color: ${theme.surfaces[1].bg};
+          margin-top: 2px;
+          border: 1px solid ${theme.colors.border};
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          border-radius: 2px;
+          padding: 4px 0;
+        }
+        .dropdown-item-button.jimu-btn {
+          width: 100%;
+          justify-content: flex-start;
+          text-align: left;
+          background-color: transparent;
+          border: none;
+          border-radius: 0;
+          &:hover {
+            background-color: ${theme.colors.palette.light[400]};
+          }
+        }
       `
     }
 
@@ -130,56 +190,78 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       ${baseStyle};
       border: 1px solid ${config.widgetBorderColor};
       background-color: ${config.widgetBackgroundColor};
+      .main-button-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        height: 32px;
+        padding: 0 8px 0 12px;
+        cursor: pointer;
+        background-color: ${config.dropdownBackgroundColor};
+        border: 1px solid ${config.widgetBorderColor};
+        color: ${config.dropdownTextColor};
+        border-radius: ${config.dropdownBorderRadius}px;
+      }
+      .main-button-wrapper .button-text-label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .main-button-wrapper .button-icon {
+        flex-shrink: 0;
+        color: ${config.dropdownArrowColor};
+        fill: ${config.dropdownArrowColor};
+      }
+      .dropdown-menu-container {
+        background-color: ${config.dropdownSectionBackgroundColor};
+        margin-top: 2px;
+        border: 1px solid ${config.widgetBorderColor};
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border-radius: ${config.dropdownBorderRadius}px;
+        padding: 4px 0;
+      }
+      .dropdown-item-button.jimu-btn {
+        width: 100%;
+        justify-content: flex-start;
+        text-align: left;
+        color: ${config.dropdownSectionTextColor};
+        background-color: transparent;
+        border: none;
+        border-radius: ${config.dropdownSectionBorderRadius}px;
+        &:hover {
+          background-color: ${config.dropdownBackgroundColor};
+          color: ${config.dropdownSectionHoverTextColor};
+        }
+      }
     `
   }
 
   render (): React.ReactElement {
     const { config, theme } = this.props
     const { feeds = [] } = config
-    const { current, expanded } = this.state
+    const { current, expanded, menuOpen } = this.state
 
     return (
       <div className='video-feed-widget' css={this.getStyle(theme)}>
         {!expanded && (
           <>
             {feeds.length > 1 && (
-              <>
-                <style>{`
-                  .video-feed-widget select option {
-                    background: ${config.dropdownSectionBackgroundColor};
-                    color: ${config.dropdownSectionTextColor};
-                    border-radius: ${config.dropdownSectionBorderRadius}px;
-                  }
-                  .video-feed-widget select option:hover {
-                    color: ${config.dropdownSectionHoverTextColor};
-                  }
-                `}</style>
-                <select
-                  style={{
-                    position: 'absolute',
-                    top: 10,
-                    left: 10,
-                    zIndex: 2,
-                    background: config.dropdownBackgroundColor,
-                    color: config.dropdownTextColor,
-                    borderRadius: `${config.dropdownBorderRadius}px`,
-                    padding: '4px 24px 4px 8px',
-                    appearance: 'none',
-                    WebkitAppearance: 'none',
-                    MozAppearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg fill='${encodeURIComponent(config.dropdownArrowColor)}' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4z'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 4px center',
-                    backgroundSize: '12px'
-                  }}
-                  value={current}
-                  onChange={e => this.setState({ current: parseInt(e.target.value) })}
-                >
-                  {feeds.map((f, i) => (
-                    <option key={i} value={i}>{f.name || `Feed ${i + 1}`}</option>
-                  ))}
-                </select>
-              </>
+              <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 2, width: 200 }}>
+                <div className='main-button-wrapper' onClick={this.toggleMenu} role='button' aria-expanded={menuOpen}>
+                  <span className='button-text-label'>{feeds[current]?.name || 'Select feed'}</span>
+                  <Icon className='button-icon' icon={dropdownIconSvg} />
+                </div>
+                <Collapse isOpen={menuOpen}>
+                  <div className='dropdown-menu-container'>
+                    {feeds.filter(f => f.name && f.url).map((f, i) => (
+                      <Button key={i} type='tertiary' className='dropdown-item-button' onClick={() => this.selectFeed(i)}>
+                        {f.name}
+                      </Button>
+                    ))}
+                  </div>
+                </Collapse>
+              </div>
             )}
             <button
               style={{
@@ -198,7 +280,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               controls
               autoPlay
               muted
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, borderRadius: 'inherit' }}
             />
             {feeds.length === 0 && (
               <span style={{ color: '#fff', zIndex: 1 }}>
@@ -212,17 +294,19 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
           <div
             style={{
               position: 'fixed',
-              top: '10%',
-              left: '10%',
-              width: '80%',
-              height: '80%',
+              top: '5%',
+              left: '5%',
+              width: '90%',
+              height: '90%',
               background: config.popupBackgroundColor,
               zIndex: 1000,
-              display: 'flex',
-              flexWrap: 'wrap',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gridAutoRows: '1fr',
               gap: `${config.popupGap}px`,
               padding: `${config.popupPadding}px`,
-              borderRadius: `${config.popupBorderRadius}px`
+              borderRadius: `${config.popupBorderRadius}px`,
+              overflow: 'auto'
             }}
           >
             <button
@@ -238,14 +322,15 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               onClick={this.toggleExpand}
             >×</button>
             {feeds.map((feed, i) => (
-              <video
-                key={i}
-                ref={el => { this.gridVideos[i] = el }}
-                controls
-                autoPlay
-                muted
-                style={{ flex: '1 0 50%', maxHeight: '50%', objectFit: 'cover', padding: `${config.popupItemPadding}px` }}
-              />
+              <div key={i} style={{ padding: `${config.popupItemPadding}px`, overflow: 'hidden', borderRadius: `${config.popupBorderRadius}px` }}>
+                <video
+                  ref={el => { this.gridVideos[i] = el }}
+                  controls
+                  autoPlay
+                  muted
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
+                />
+              </div>
             ))}
           </div>
         )}

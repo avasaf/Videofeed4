@@ -7,6 +7,8 @@ export interface Feed {
 
 export type IMConfig = ImmutableObject<{
   feeds: Feed[]
+  /** Query string appended to all video and fragment requests */
+  authQueryString: string
   useAdvancedStyles: boolean
   widgetBackgroundColor: string
   widgetBorderColor: string
