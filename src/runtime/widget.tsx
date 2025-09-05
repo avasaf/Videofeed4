@@ -55,15 +55,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       setTimeout(() => this.setupGridPlayers(), 0)
     }
 
-    if (prevState.expanded !== this.state.expanded) {
-      if (this.state.expanded) {
-        setTimeout(() => this.setupGridPlayers(), 0)
-      } else {
-        this.cleanupGrid()
-        this.setupPlayer()
-      }
-    }
-
     if (this.state.expanded && prevProps.config.feeds !== this.props.config.feeds) {
       setTimeout(() => this.setupGridPlayers(), 0)
     }
@@ -368,7 +359,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
                   muted
                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
                 />
-                <div style={{ position: 'absolute', top: 5, right: 5, background: config.markerBackgroundColor, color: config.markerTextColor, padding: '4px 8px', borderRadius: `${config.markerBorderRadius}px`, pointerEvents: 'none' }}>{feed.name}</div>
+                <div style={{ position: 'absolute', top: 10, right: 10, background: config.markerBackgroundColor, color: config.markerTextColor, padding: '4px 8px', borderRadius: `${config.markerBorderRadius}px`, pointerEvents: 'none' }}>{feed.name}</div>
               </div>
             ))}
           </div>
