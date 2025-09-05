@@ -1,3 +1,3 @@
 export default {
-    videoUrl: 'Video Stream URL'
+    videoUrl: 'Video Feeds'
 }

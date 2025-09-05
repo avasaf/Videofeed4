@@ -1,9 +1,9 @@
 /** @jsx jsx */
-import { React, jsx, type AllWidgetSettingProps, css, type ThemeVariables } from 'jimu-core'
-import { TextInput, Label, Switch, Collapse } from 'jimu-ui'
+import { React, jsx, type AllWidgetSettingProps, css, type ThemeVariables, Immutable } from 'jimu-core'
+import { TextInput, Label, Switch, Collapse, Button } from 'jimu-ui'
 import { SettingSection, SettingRow } from 'jimu-ui/advanced/setting-components'
 import { ThemeColorPicker } from 'jimu-ui/basic/color-picker'
-import { type IMConfig } from '../runtime/config'
+import { type IMConfig } from '../config'
 import defaultMessages from './translations/default'
 
 const getSettingStyles = (theme: ThemeVariables) => {
@@ -29,8 +29,22 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
     })
   }
 
-  onVideoUrlChange = (evt: React.ChangeEvent<HTMLInputElement>): void => {
-    this.onConfigChange('videoUrl', evt.target.value)
+  onFeedChange = (index: number, field: 'name' | 'url', value: string): void => {
+    const feeds = (this.props.config.feeds?.asMutable({ deep: true }) || []) as any[]
+    feeds[index][field] = value
+    this.onConfigChange('feeds', Immutable(feeds))
+  }
+
+  addFeed = (): void => {
+    const feeds = (this.props.config.feeds?.asMutable({ deep: true }) || []) as any[]
+    feeds.push({ name: '', url: '' })
+    this.onConfigChange('feeds', Immutable(feeds))
+  }
+
+  removeFeed = (index: number): void => {
+    const feeds = (this.props.config.feeds?.asMutable({ deep: true }) || []) as any[]
+    feeds.splice(index, 1)
+    this.onConfigChange('feeds', Immutable(feeds))
   }
 
   render(): React.ReactElement {
@@ -42,13 +56,25 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
           <SettingRow>
             <Label>{intl.formatMessage({ id: 'videoUrl', defaultMessage: defaultMessages.videoUrl })}</Label>
           </SettingRow>
+          {config.feeds?.map((feed, i) => (
+            <SettingRow key={i} className="feed-row" flow="wrap">
+              <TextInput
+                style={{ width: '30%', marginRight: '4px' }}
+                value={feed.name}
+                onChange={e => this.onFeedChange(i, 'name', e.target.value)}
+                placeholder="Name"
+              />
+              <TextInput
+                style={{ flex: 1, marginRight: '4px' }}
+                value={feed.url}
+                onChange={e => this.onFeedChange(i, 'url', e.target.value)}
+                placeholder="URL"
+              />
+              <Button size="sm" onClick={() => this.removeFeed(i)}>Remove</Button>
+            </SettingRow>
+          ))}
           <SettingRow>
-            <TextInput
-              className="jimu-input"
-              value={config.videoUrl}
-              onChange={this.onVideoUrlChange}
-              placeholder="Enter video stream URL"
-            />
+            <Button size="sm" onClick={this.addFeed}>Add Feed</Button>
           </SettingRow>
         </SettingSection>
 
