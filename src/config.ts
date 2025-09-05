@@ -17,6 +17,7 @@ export type IMConfig = ImmutableObject<{
   dropdownTextColor: string
   dropdownSectionTextColor: string
   dropdownSectionHoverTextColor: string
+  dropdownSectionHoverBorderRadius: number
   dropdownArrowColor: string
   expandButtonBackgroundColor: string
   expandButtonIconColor: string

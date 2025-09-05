@@ -68,7 +68,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
   }
 
   private setupGridPlayers (): void {
-    this.cleanupGrid()
+    // destroy any existing Hls instances but keep the element refs
+    this.gridHls.forEach(h => h && h.destroy())
+    this.gridHls = []
     const feeds = this.props.config.feeds || []
     feeds.forEach((feed, i) => {
       const el = this.gridVideos[i]
@@ -148,10 +150,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
         ${baseStyle};
         border: 1px solid ${theme.colors.border};
         .main-button-wrapper {
-          display: flex;
+          display: inline-flex;
           justify-content: space-between;
           align-items: center;
-          width: 100%;
           height: 32px;
           padding: 0 8px 0 12px;
           cursor: pointer;
@@ -171,6 +172,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
           box-shadow: 0 4px 8px rgba(0,0,0,0.1);
           border-radius: 2px;
           padding: 4px 0;
+          min-width: 100%;
         }
         .dropdown-item-button.jimu-btn {
           width: 100%;
@@ -191,10 +193,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       border: 1px solid ${config.widgetBorderColor};
       background-color: ${config.widgetBackgroundColor};
       .main-button-wrapper {
-        display: flex;
+        display: inline-flex;
         justify-content: space-between;
         align-items: center;
-        width: 100%;
         height: 32px;
         padding: 0 8px 0 12px;
         cursor: pointer;
@@ -205,8 +206,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       }
       .main-button-wrapper .button-text-label {
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
       }
       .main-button-wrapper .button-icon {
         flex-shrink: 0;
@@ -220,6 +219,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         border-radius: ${config.dropdownBorderRadius}px;
         padding: 4px 0;
+        min-width: 100%;
       }
       .dropdown-item-button.jimu-btn {
         width: 100%;
@@ -247,35 +247,33 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       <div className='video-feed-widget' css={this.getStyle(theme)}>
         {!expanded && (
           <>
-            {feeds.length > 1 && (
-              <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 2, width: 200 }}>
-                <div className='main-button-wrapper' onClick={this.toggleMenu} role='button' aria-expanded={menuOpen}>
-                  <span className='button-text-label'>{feeds[current]?.name || 'Select feed'}</span>
-                  <Icon className='button-icon' icon={dropdownIconSvg} />
-                </div>
-                <Collapse isOpen={menuOpen}>
-                  <div className='dropdown-menu-container'>
-                    {feeds.filter(f => f.name && f.url).map((f, i) => (
-                      <Button key={i} type='tertiary' className='dropdown-item-button' onClick={() => this.selectFeed(i)}>
-                        {f.name}
-                      </Button>
-                    ))}
+            <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 2, display: 'flex', alignItems: 'flex-start' }}>
+              {feeds.length > 1 && (
+                <div style={{ marginRight: 10 }}>
+                  <div className='main-button-wrapper' onClick={this.toggleMenu} role='button' aria-expanded={menuOpen}>
+                    <span className='button-text-label'>{feeds[current]?.name || 'Select feed'}</span>
+                    <Icon className='button-icon' icon={dropdownIconSvg} />
                   </div>
-                </Collapse>
-              </div>
-            )}
-            <button
-              style={{
-                position: 'absolute',
-                top: 10,
-                right: 10,
-                zIndex: 2,
-                background: config.expandButtonBackgroundColor,
-                color: config.expandButtonIconColor,
-                borderRadius: `${config.expandButtonBorderRadius}px`
-              }}
-              onClick={this.toggleExpand}
-            >⛶</button>
+                  <Collapse isOpen={menuOpen}>
+                    <div className='dropdown-menu-container'>
+                      {feeds.filter(f => f.name && f.url).map((f, i) => (
+                        <Button key={i} type='tertiary' className='dropdown-item-button' onClick={() => this.selectFeed(i)}>
+                          {f.name}
+                        </Button>
+                      ))}
+                    </div>
+                  </Collapse>
+                </div>
+              )}
+              <button
+                style={{
+                  background: config.expandButtonBackgroundColor,
+                  color: config.expandButtonIconColor,
+                  borderRadius: `${config.expandButtonBorderRadius}px`
+                }}
+                onClick={this.toggleExpand}
+              >⛶</button>
+            </div>
             <video
               ref={this.videoRef}
               controls

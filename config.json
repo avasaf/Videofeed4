@@ -10,6 +10,7 @@
   "dropdownTextColor": "#FFFFFF",
   "dropdownSectionTextColor": "#FFFFFF",
   "dropdownSectionHoverTextColor": "#FFFF00",
+  "dropdownSectionHoverBorderRadius": 0,
   "dropdownArrowColor": "#FFFFFF",
   "expandButtonBackgroundColor": "#333333",
   "expandButtonIconColor": "#FFFFFF",

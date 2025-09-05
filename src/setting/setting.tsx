@@ -27,7 +27,7 @@ const getSettingStyles = (theme: ThemeVariables) => css`
     border-radius: ${theme.borderRadiuses.medium};
     position: relative;
   }
-  .feed-group .jimu-setting__row {
+  .feed-group .jimu-input {
     margin-bottom: 12px;
   }
   .feed-input {
@@ -113,12 +113,14 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
               <Button icon size='sm' type='tertiary' className='delete-button' onClick={() => { this.deleteFeed(index) }} title={`Delete Feed ${index + 1}`}>
                 <Icon icon={deleteIcon} size='14' />
               </Button>
-              <SettingRow className='feed-row' flow='no-wrap' label={`${intl.formatMessage({ id: 'feedName', defaultMessage: 'Feed Name' })} ${index + 1}`}>
+              <div>
+                <Label>{`${intl.formatMessage({ id: 'feedName', defaultMessage: 'Feed Name' })} ${index + 1}`}</Label>
                 <TextInput className='feed-input' value={feed.name} onChange={(evt) => { this.onFeedNameChange(index, evt) }} placeholder={`Enter feed name ${index + 1}`}/>
-              </SettingRow>
-              <SettingRow className='feed-row' flow='no-wrap' label={`${intl.formatMessage({ id: 'feedUrl', defaultMessage: 'Feed URL' })} ${index + 1}`}>
+              </div>
+              <div>
+                <Label>{`${intl.formatMessage({ id: 'feedUrl', defaultMessage: 'Feed URL' })} ${index + 1}`}</Label>
                 <TextInput className='feed-input' value={feed.url} onChange={(evt) => { this.onFeedUrlChange(index, evt) }} placeholder={`Enter feed URL ${index + 1}`}/>
-              </SettingRow>
+              </div>
             </div>
           ))}
 
@@ -130,7 +132,7 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
         </SettingSection>
 
         <SettingSection title={intl.formatMessage({ id: 'advanced', defaultMessage: 'Advanced' })}>
-          <SettingRow>
+          <SettingRow style={{ marginBottom: 12 }}>
             <div className='advanced-switch-container'>
               <Label>{intl.formatMessage({ id: 'advancedStyling', defaultMessage: 'Advanced Styling' })}</Label>
               <Switch checked={config.useAdvancedStyles} onChange={evt => { this.onConfigChange('useAdvancedStyles', evt.target.checked) }}/>
