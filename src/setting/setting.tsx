@@ -11,7 +11,6 @@ const deleteIcon = require('jimu-ui/lib/icons/delete.svg')
 
 interface SettingState {
   feeds: Feed[]
-  authQueryString: string
 }
 
 const getSettingStyles = (theme: ThemeVariables) => css`
@@ -38,7 +37,7 @@ const getSettingStyles = (theme: ThemeVariables) => css`
     margin-bottom: 10px;
   }
   .feed-group .jimu-input {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
   }
   .delete-button {
     position: absolute;
@@ -61,14 +60,26 @@ const getSettingStyles = (theme: ThemeVariables) => css`
     width: 100%;
     align-items: center;
   }
+  .style-setting {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+  .style-setting label {
+    margin-bottom: 4px;
+    white-space: nowrap;
+  }
+  .style-setting .jimu-input {
+    width: 100%;
+  }
 `
 
 export default class Setting extends React.PureComponent<AllWidgetSettingProps<IMConfig>, SettingState> {
   constructor (props) {
     super(props)
     this.state = {
-      feeds: props.config?.feeds || [],
-      authQueryString: props.config?.authQueryString || ''
+      feeds: props.config?.feeds || []
     }
   }
 
@@ -106,24 +117,13 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
     this.onConfigChange('feeds', feeds)
   }
 
-  onAuthQueryChange = (evt: React.ChangeEvent<HTMLInputElement>): void => {
-    const authQueryString = evt.target.value
-    this.setState({ authQueryString })
-    this.onConfigChange('authQueryString', authQueryString)
-  }
-
   render (): React.ReactElement {
     const { config, theme, intl } = this.props
-    const { feeds, authQueryString } = this.state
+    const { feeds } = this.state
 
     return (
       <div css={getSettingStyles(theme)} className='settings-panel'>
         <SettingSection>
-          <div className='setting-section-item'>
-            <Label>{intl.formatMessage({ id: 'authQuery', defaultMessage: 'Auth Query String' })}</Label>
-            <TextInput className='jimu-input' value={authQueryString} onChange={this.onAuthQueryChange} placeholder='key=value&...'/>
-          </div>
-
           {feeds.map((feed, index) => (
             <div key={index} className='setting-section-item feed-group'>
               <Button icon size='sm' type='tertiary' className='delete-button' onClick={() => { this.deleteFeed(index) }} title={`Delete Feed ${index + 1}`}>
@@ -155,114 +155,80 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
             </div>
           </SettingRow>
           <Collapse isOpen={config.useAdvancedStyles}>
-            <SettingRow label='Background Color'>
+            <SettingRow className='style-setting'>
+              <Label>Background Color</Label>
               <ThemeColorPicker value={config.widgetBackgroundColor} onChange={color => { this.onConfigChange('widgetBackgroundColor', color) }}/>
             </SettingRow>
-            <SettingRow label='Border Color'>
+            <SettingRow className='style-setting'>
+              <Label>Border Color</Label>
               <ThemeColorPicker value={config.widgetBorderColor} onChange={color => { this.onConfigChange('widgetBorderColor', color) }}/>
             </SettingRow>
-            <SettingRow label='Dropdown Background'>
+            <SettingRow className='style-setting'>
+              <Label>Dropdown Background</Label>
               <ThemeColorPicker value={config.dropdownBackgroundColor} onChange={color => { this.onConfigChange('dropdownBackgroundColor', color) }}/>
             </SettingRow>
-            <SettingRow label='Dropdown Section Background'>
+            <SettingRow className='style-setting'>
+              <Label>Dropdown Section Background</Label>
               <ThemeColorPicker value={config.dropdownSectionBackgroundColor} onChange={color => { this.onConfigChange('dropdownSectionBackgroundColor', color) }}/>
             </SettingRow>
-            <SettingRow label='Dropdown Border Radius'>
+            <SettingRow className='style-setting'>
+              <Label>Dropdown Section Hover Background</Label>
+              <ThemeColorPicker value={config.dropdownSectionHoverBackgroundColor} onChange={color => { this.onConfigChange('dropdownSectionHoverBackgroundColor', color) }}/>
+            </SettingRow>
+            <SettingRow className='style-setting'>
+              <Label>Dropdown Border Radius</Label>
               <TextInput type='number' value={config.dropdownBorderRadius} onChange={e => { this.onConfigChange('dropdownBorderRadius', parseInt(e.target.value)) }}/>
             </SettingRow>
-            <SettingRow label='Dropdown Section Border Radius'>
-              <TextInput type='number' value={config.dropdownSectionBorderRadius} onChange={e => { this.onConfigChange('dropdownSectionBorderRadius', parseInt(e.target.value)) }}/>
-            </SettingRow>
-            <SettingRow label='Dropdown Text Color'>
+            <SettingRow className='style-setting'>
+              <Label>Dropdown Text Color</Label>
               <ThemeColorPicker value={config.dropdownTextColor} onChange={color => { this.onConfigChange('dropdownTextColor', color) }}/>
             </SettingRow>
-            <SettingRow label='Dropdown Section Text Color'>
+            <SettingRow className='style-setting'>
+              <Label>Dropdown Section Text Color</Label>
               <ThemeColorPicker value={config.dropdownSectionTextColor} onChange={color => { this.onConfigChange('dropdownSectionTextColor', color) }}/>
             </SettingRow>
-            <SettingRow label='Dropdown Section Hover Text Color'>
+            <SettingRow className='style-setting'>
+              <Label>Dropdown Section Hover Text Color</Label>
               <ThemeColorPicker value={config.dropdownSectionHoverTextColor} onChange={color => { this.onConfigChange('dropdownSectionHoverTextColor', color) }}/>
             </SettingRow>
-            <SettingRow label='Dropdown Arrow Color'>
+            <SettingRow className='style-setting'>
+              <Label>Dropdown Arrow Color</Label>
               <ThemeColorPicker value={config.dropdownArrowColor} onChange={color => { this.onConfigChange('dropdownArrowColor', color) }}/>
             </SettingRow>
-            <SettingRow label='Expand Button Background'>
+            <SettingRow className='style-setting'>
+              <Label>Expand Button Background</Label>
               <ThemeColorPicker value={config.expandButtonBackgroundColor} onChange={color => { this.onConfigChange('expandButtonBackgroundColor', color) }}/>
             </SettingRow>
-            <SettingRow label='Expand Button Icon Color'>
+            <SettingRow className='style-setting'>
+              <Label>Expand Button Icon Color</Label>
               <ThemeColorPicker value={config.expandButtonIconColor} onChange={color => { this.onConfigChange('expandButtonIconColor', color) }}/>
             </SettingRow>
-            <SettingRow label='Expand Button Border Radius'>
+            <SettingRow className='style-setting'>
+              <Label>Expand Button Border Radius</Label>
               <TextInput type='number' value={config.expandButtonBorderRadius} onChange={e => { this.onConfigChange('expandButtonBorderRadius', parseInt(e.target.value)) }}/>
             </SettingRow>
-            <SettingRow label='Popup Gap'>
+            <SettingRow className='style-setting'>
+              <Label>Popup Gap</Label>
               <TextInput type='number' value={config.popupGap} onChange={e => { this.onConfigChange('popupGap', parseInt(e.target.value)) }}/>
             </SettingRow>
-            <SettingRow label='Popup Padding'>
+            <SettingRow className='style-setting'>
+              <Label>Popup Padding</Label>
               <TextInput type='number' value={config.popupPadding} onChange={e => { this.onConfigChange('popupPadding', parseInt(e.target.value)) }}/>
             </SettingRow>
-            <SettingRow label='Popup Item Padding'>
+            <SettingRow className='style-setting'>
+              <Label>Popup Item Padding</Label>
               <TextInput type='number' value={config.popupItemPadding} onChange={e => { this.onConfigChange('popupItemPadding', parseInt(e.target.value)) }}/>
             </SettingRow>
-            <SettingRow label='Popup Background'>
+            <SettingRow className='style-setting'>
+              <Label>Popup Background</Label>
               <ThemeColorPicker value={config.popupBackgroundColor} onChange={color => { this.onConfigChange('popupBackgroundColor', color) }}/>
             </SettingRow>
-            <SettingRow label='Popup Border Radius'>
+            <SettingRow className='style-setting'>
+              <Label>Popup Border Radius</Label>
               <TextInput type='number' value={config.popupBorderRadius} onChange={e => { this.onConfigChange('popupBorderRadius', parseInt(e.target.value)) }}/>
-            </SettingRow>
-
-            <SettingRow label="Dropdown Background">
-              <ThemeColorPicker value={config.dropdownBackgroundColor} onChange={color => { this.onConfigChange('dropdownBackgroundColor', color) }} />
-            </SettingRow>
-            <SettingRow label="Dropdown Section Background">
-              <ThemeColorPicker value={config.dropdownSectionBackgroundColor} onChange={color => { this.onConfigChange('dropdownSectionBackgroundColor', color) }} />
-            </SettingRow>
-            <SettingRow label="Dropdown Border Radius">
-              <TextInput type="number" value={config.dropdownBorderRadius} onChange={e => { this.onConfigChange('dropdownBorderRadius', parseInt(e.target.value)) }} />
-            </SettingRow>
-            <SettingRow label="Dropdown Section Border Radius">
-              <TextInput type="number" value={config.dropdownSectionBorderRadius} onChange={e => { this.onConfigChange('dropdownSectionBorderRadius', parseInt(e.target.value)) }} />
-            </SettingRow>
-            <SettingRow label="Dropdown Text Color">
-              <ThemeColorPicker value={config.dropdownTextColor} onChange={color => { this.onConfigChange('dropdownTextColor', color) }} />
-            </SettingRow>
-            <SettingRow label="Dropdown Section Text Color">
-              <ThemeColorPicker value={config.dropdownSectionTextColor} onChange={color => { this.onConfigChange('dropdownSectionTextColor', color) }} />
-            </SettingRow>
-            <SettingRow label="Dropdown Section Hover Text Color">
-              <ThemeColorPicker value={config.dropdownSectionHoverTextColor} onChange={color => { this.onConfigChange('dropdownSectionHoverTextColor', color) }} />
-            </SettingRow>
-            <SettingRow label="Dropdown Arrow Color">
-              <ThemeColorPicker value={config.dropdownArrowColor} onChange={color => { this.onConfigChange('dropdownArrowColor', color) }} />
-            </SettingRow>
-
-            <SettingRow label="Expand Button Background">
-              <ThemeColorPicker value={config.expandButtonBackgroundColor} onChange={color => { this.onConfigChange('expandButtonBackgroundColor', color) }} />
-            </SettingRow>
-            <SettingRow label="Expand Button Icon Color">
-              <ThemeColorPicker value={config.expandButtonIconColor} onChange={color => { this.onConfigChange('expandButtonIconColor', color) }} />
-            </SettingRow>
-            <SettingRow label="Expand Button Border Radius">
-              <TextInput type="number" value={config.expandButtonBorderRadius} onChange={e => { this.onConfigChange('expandButtonBorderRadius', parseInt(e.target.value)) }} />
-            </SettingRow>
-
-            <SettingRow label="Popup Gap">
-              <TextInput type="number" value={config.popupGap} onChange={e => { this.onConfigChange('popupGap', parseInt(e.target.value)) }} />
-            </SettingRow>
-            <SettingRow label="Popup Padding">
-              <TextInput type="number" value={config.popupPadding} onChange={e => { this.onConfigChange('popupPadding', parseInt(e.target.value)) }} />
-            </SettingRow>
-            <SettingRow label="Popup Item Padding">
-              <TextInput type="number" value={config.popupItemPadding} onChange={e => { this.onConfigChange('popupItemPadding', parseInt(e.target.value)) }} />
-            </SettingRow>
-            <SettingRow label="Popup Background">
-              <ThemeColorPicker value={config.popupBackgroundColor} onChange={color => { this.onConfigChange('popupBackgroundColor', color) }} />
-            </SettingRow>
-            <SettingRow label="Popup Border Radius">
-              <TextInput type="number" value={config.popupBorderRadius} onChange={e => { this.onConfigChange('popupBorderRadius', parseInt(e.target.value)) }} />
             </SettingRow>
           </Collapse>
         </SettingSection>
       </div>
     )
   }
-}

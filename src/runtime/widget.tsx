@@ -52,12 +52,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
     this.cleanupGrid()
   }
 
-  private appendQuery (url: string): string {
-    const q = this.props.config.authQueryString
-    if (!q) return url
-    return url.includes('?') ? `${url}&${q}` : `${url}?${q}`
-  }
-
   private cleanupPlayer (): void {
     if (this.hls) {
       this.hls.destroy()
@@ -90,17 +84,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
 
   private initializeHls (url: string, videoElement: HTMLVideoElement, store: boolean): void {
     if (!url || !videoElement) return
-    const src = this.appendQuery(url)
 
-    if (src.includes('.m3u8') && Hls.isSupported()) {
-      const hls = new Hls({
-        xhrSetup: (xhr, url) => {
-          const newUrl = this.appendQuery(url)
-          xhr.open('GET', newUrl, true)
-        }
-      })
-      hls.loadSource(src)
-
+    if (url.includes('.m3u8') && Hls.isSupported()) {
+      const hls = new Hls()
+      hls.loadSource(url)
       hls.attachMedia(videoElement)
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         videoElement.play().catch(() => { console.warn('Browser prevented autoplay.') })
@@ -111,7 +98,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
         this.hls = hls
       }
     } else {
-      videoElement.src = src
+      videoElement.src = url
       videoElement.load()
       videoElement.play().catch(() => { console.warn('Browser prevented autoplay.') })
     }
@@ -228,9 +215,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
         color: ${config.dropdownSectionTextColor};
         background-color: transparent;
         border: none;
-        border-radius: ${config.dropdownSectionBorderRadius}px;
         &:hover {
-          background-color: ${config.dropdownBackgroundColor};
+          background-color: ${config.dropdownSectionHoverBackgroundColor};
           color: ${config.dropdownSectionHoverTextColor};
         }
       }
@@ -301,7 +287,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               background: config.popupBackgroundColor,
               zIndex: 1000,
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gridTemplateColumns: 'repeat(2, 1fr)',
               gridAutoRows: '1fr',
               gap: `${config.popupGap}px`,
               padding: `${config.popupPadding}px`,

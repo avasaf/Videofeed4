@@ -7,15 +7,13 @@ export interface Feed {
 
 export type IMConfig = ImmutableObject<{
   feeds: Feed[]
-  /** Query string appended to all video and fragment requests */
-  authQueryString: string
   useAdvancedStyles: boolean
   widgetBackgroundColor: string
   widgetBorderColor: string
   dropdownBackgroundColor: string
   dropdownSectionBackgroundColor: string
+  dropdownSectionHoverBackgroundColor: string
   dropdownBorderRadius: number
-  dropdownSectionBorderRadius: number
   dropdownTextColor: string
   dropdownSectionTextColor: string
   dropdownSectionHoverTextColor: string
