@@ -1,6 +1,23 @@
 {
-  "videoUrl": "",
+  "feeds": [],
   "useAdvancedStyles": false,
   "widgetBackgroundColor": "#FFFFFF",
-  "widgetBorderColor": "#A8A8A8"
+  "widgetBorderColor": "#A8A8A8",
+  "dropdownBackgroundColor": "#333333",
+  "dropdownSectionBackgroundColor": "#222222",
+  "dropdownSectionHoverBackgroundColor": "#444444",
+  "dropdownBorderRadius": 4,
+  "dropdownTextColor": "#FFFFFF",
+  "dropdownSectionTextColor": "#FFFFFF",
+  "dropdownSectionHoverTextColor": "#FFFF00",
+  "dropdownSectionHoverBorderRadius": 0,
+  "dropdownArrowColor": "#FFFFFF",
+  "expandButtonBackgroundColor": "#333333",
+  "expandButtonIconColor": "#FFFFFF",
+  "expandButtonBorderRadius": 4,
+  "popupGap": 4,
+  "popupPadding": 8,
+  "popupItemPadding": 0,
+  "popupBackgroundColor": "#000000",
+  "popupBorderRadius": 0
 }
