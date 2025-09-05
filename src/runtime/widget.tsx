@@ -29,8 +29,17 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
   }
 
   componentDidUpdate (prevProps: AllWidgetProps<IMConfig>, prevState: State): void {
-    if (!this.state.expanded && (prevProps.config.feeds !== this.props.config.feeds || prevState.current !== this.state.current)) {
-      this.setupPlayer()
+    if (!this.state.expanded) {
+      if (prevProps.config.feeds !== this.props.config.feeds) {
+        const len = this.props.config.feeds?.length || 0
+        if (this.state.current >= len) {
+          this.setState({ current: 0 }, () => { this.setupPlayer() })
+        } else {
+          this.setupPlayer()
+        }
+      } else if (prevState.current !== this.state.current) {
+        this.setupPlayer()
+      }
     }
 
     if (prevState.expanded !== this.state.expanded) {
@@ -45,6 +54,24 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
     if (this.state.expanded && prevProps.config.feeds !== this.props.config.feeds) {
       setTimeout(() => this.setupGridPlayers(), 0)
     }
+
+    if (prevState.expanded !== this.state.expanded) {
+      if (this.state.expanded) {
+        setTimeout(() => this.setupGridPlayers(), 0)
+      } else {
+        this.cleanupGrid()
+        this.setupPlayer()
+      }
+    }
+
+    if (this.state.expanded && prevProps.config.feeds !== this.props.config.feeds) {
+      setTimeout(() => this.setupGridPlayers(), 0)
+    }
+  }
+
+  componentWillUnmount (): void {
+    this.cleanupPlayer()
+    this.cleanupGrid()
   }
 
   componentWillUnmount (): void {
@@ -277,6 +304,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
                     color: config.expandButtonIconColor,
                     borderRadius: `${config.expandButtonBorderRadius}px`,
                     height: 32,
+                    width: 32,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
@@ -311,7 +339,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               background: config.popupBackgroundColor,
               zIndex: 1000,
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(30%, 1fr))',
+              gridTemplateColumns: 'repeat(2, 1fr)',
               gridAutoRows: '1fr',
               gap: `${config.popupGap}px`,
               padding: `${config.popupPadding}px`,
@@ -340,7 +368,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
                   muted
                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
                 />
-                <div style={{ position: 'absolute', top: 5, left: 5, background: 'rgba(0,0,0,0.6)', color: '#fff', padding: '2px 4px', borderRadius: 4, pointerEvents: 'none' }}>{feed.name}</div>
+                <div style={{ position: 'absolute', top: 5, right: 5, background: config.markerBackgroundColor, color: config.markerTextColor, padding: '4px 8px', borderRadius: `${config.markerBorderRadius}px`, pointerEvents: 'none' }}>{feed.name}</div>
               </div>
             ))}
           </div>

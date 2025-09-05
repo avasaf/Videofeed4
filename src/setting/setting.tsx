@@ -28,7 +28,7 @@ const getSettingStyles = (theme: ThemeVariables) => css`
     position: relative;
   }
   .feed-group .jimu-input {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
   }
   .feed-input {
     width: 100%;
@@ -195,6 +195,15 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
             </SettingRow>
             <SettingRow label='Popup Border Radius'>
               <TextInput className='narrow-input' type='number' value={config.popupBorderRadius} onChange={e => { this.onConfigChange('popupBorderRadius', parseInt(e.target.value)) }}/>
+            </SettingRow>
+            <SettingRow label='Marker Background'>
+              <ThemeColorPicker value={config.markerBackgroundColor} onChange={color => { this.onConfigChange('markerBackgroundColor', color) }}/>
+            </SettingRow>
+            <SettingRow label='Marker Text Color'>
+              <ThemeColorPicker value={config.markerTextColor} onChange={color => { this.onConfigChange('markerTextColor', color) }}/>
+            </SettingRow>
+            <SettingRow label='Marker Border Radius'>
+              <TextInput className='narrow-input' type='number' value={config.markerBorderRadius} onChange={e => { this.onConfigChange('markerBorderRadius', parseInt(e.target.value)) }}/>
             </SettingRow>
           </Collapse>
         </SettingSection>

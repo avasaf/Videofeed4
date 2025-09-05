@@ -19,5 +19,8 @@
   "popupPadding": 8,
   "popupItemPadding": 0,
   "popupBackgroundColor": "#000000",
-  "popupBorderRadius": 0
+  "popupBorderRadius": 0,
+  "markerBackgroundColor": "#00000099",
+  "markerTextColor": "#FFFFFF",
+  "markerBorderRadius": 4
 }
