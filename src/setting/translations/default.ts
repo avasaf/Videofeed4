@@ -1,3 +1,5 @@
 export default {
-    videoUrl: 'Video Stream URL'
+  videoUrl: 'Video Feeds',
+  advanced: 'Advanced',
+  advancedStyling: 'Advanced Styling'
 }

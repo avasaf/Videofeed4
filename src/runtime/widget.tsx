@@ -1,83 +1,111 @@
 /** @jsx jsx */
 import { React, AllWidgetProps, jsx, css, type IMThemeVariables, type SerializedStyles } from 'jimu-core'
-import { type IMConfig } from './config'
+import { type IMConfig } from '../config'
 import Hls from './lib/hls.min.js'
 
-export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>, unknown> {
-  // Create a reference to the <video> DOM element
+interface State {
+  current: number
+  expanded: boolean
+}
+
+export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>, State> {
   private readonly videoRef: React.RefObject<HTMLVideoElement>
   private hls: Hls
+  private gridVideos: HTMLVideoElement[] = []
+  private gridHls: Hls[] = []
 
-  constructor(props) {
+  constructor (props) {
     super(props)
+    this.state = { current: 0, expanded: false }
     this.videoRef = React.createRef()
     this.hls = null
   }
 
-  componentDidMount(): void {
+  componentDidMount (): void {
     this.setupPlayer()
   }
 
-  // If the URL in the settings changes, re-setup the player
-  componentDidUpdate(prevProps: AllWidgetProps<IMConfig>): void {
-    if (this.props.config.videoUrl !== prevProps.config.videoUrl) {
+  componentDidUpdate (prevProps: AllWidgetProps<IMConfig>, prevState: State): void {
+    if (!this.state.expanded && (prevProps.config.feeds !== this.props.config.feeds || prevState.current !== this.state.current)) {
       this.setupPlayer()
     }
-  }
 
-  // Clean up the HLS instance when the widget is removed
-  componentWillUnmount(): void {
-    if (this.hls) {
-      this.hls.destroy()
+    if (prevState.expanded !== this.state.expanded) {
+      if (this.state.expanded) {
+        setTimeout(() => this.setupGridPlayers(), 0)
+      } else {
+        this.cleanupGrid()
+        this.setupPlayer()
+      }
+    }
+
+    if (this.state.expanded && prevProps.config.feeds !== this.props.config.feeds) {
+      setTimeout(() => this.setupGridPlayers(), 0)
     }
   }
 
-  setupPlayer = () => {
-    const { videoUrl } = this.props.config
+  componentWillUnmount (): void {
+    this.cleanupPlayer()
+    this.cleanupGrid()
+  }
+
+  private cleanupPlayer (): void {
+    if (this.hls) {
+      this.hls.destroy()
+      this.hls = null
+    }
+  }
+
+  private setupPlayer (): void {
+    this.cleanupPlayer()
+    const feed = this.props.config.feeds?.[this.state.current]
     const videoElement = this.videoRef.current
+    if (!feed || !videoElement) return
+    this.initializeHls(feed.url, videoElement, false)
+  }
 
-    if (!videoUrl || !videoElement) return
+  private setupGridPlayers (): void {
+    this.cleanupGrid()
+    const feeds = this.props.config.feeds || []
+    feeds.forEach((feed, i) => {
+      const el = this.gridVideos[i]
+      if (el) this.initializeHls(feed.url, el, true)
+    })
+  }
 
-    // Destroy any existing HLS instance
-    if (this.hls) {
-      this.hls.destroy()
-    }
+  private cleanupGrid (): void {
+    this.gridHls.forEach(h => h && h.destroy())
+    this.gridHls = []
+    this.gridVideos = []
+  }
 
-    // Check if the URL is an HLS stream
-    if (videoUrl.includes('.m3u8')) {
-      if (Hls.isSupported()) {
-        const url = new URL(videoUrl)
-        const qs = url.search
-        const baseUrl = `${url.origin}${url.pathname}`
-        class QueryLoader extends Hls.DefaultConfig.loader {
-          load (context, cfg, callbacks) {
-            if (qs) {
-              const sep = context.url.includes('?') ? '&' : '?'
-              context.url = `${context.url}${sep}${qs.slice(1)}`
-            }
-            super.load(context, cfg, callbacks)
-          }
-        }
-        this.hls = new Hls({ loader: QueryLoader })
-        this.hls.loadSource(baseUrl)
-        this.hls.attachMedia(videoElement)
-        // Optional: Auto-play when the manifest is parsed
-        this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          videoElement.play().catch(() => {
-            console.warn('Browser prevented autoplay.')
-          })
-        })
-      } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-        // Native HLS support (e.g., on Safari)
-        videoElement.src = videoUrl
+  private initializeHls (url: string, videoElement: HTMLVideoElement, store: boolean): void {
+    if (!url || !videoElement) return
+
+    if (url.includes('.m3u8') && Hls.isSupported()) {
+      const hls = new Hls()
+      hls.loadSource(url)
+      hls.attachMedia(videoElement)
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        videoElement.play().catch(() => { console.warn('Browser prevented autoplay.') })
+      })
+      if (store) {
+        this.gridHls.push(hls)
+      } else {
+        this.hls = hls
       }
     } else {
-      // For standard video files like .mp4, .webm, etc.
-      videoElement.src = videoUrl
+      videoElement.src = url
+      videoElement.load()
+      videoElement.play().catch(() => { console.warn('Browser prevented autoplay.') })
     }
   }
 
-  getStyle(theme: IMThemeVariables): SerializedStyles {
+  private toggleExpand = (): void => {
+    this.setState({ expanded: !this.state.expanded })
+  }
+
+  getStyle (theme: IMThemeVariables): SerializedStyles {
     const { config } = this.props
 
     const baseStyle = css`
@@ -93,34 +121,133 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
 
     if (!config.useAdvancedStyles) {
       return css`
-        ${baseStyle}
+        ${baseStyle};
         border: 1px solid ${theme.colors.border};
       `
     }
 
     return css`
-      ${baseStyle}
+      ${baseStyle};
       border: 1px solid ${config.widgetBorderColor};
       background-color: ${config.widgetBackgroundColor};
     `
   }
 
-  render(): React.ReactElement {
+  render (): React.ReactElement {
     const { config, theme } = this.props
+    const { feeds = [] } = config
+    const { current, expanded } = this.state
 
     return (
-      <div className="video-feed-widget" css={this.getStyle(theme)}>
-        <video
-          ref={this.videoRef}
-          controls
-          autoPlay
-          muted
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
-        />
-        {!config.videoUrl && (
-          <span style={{ color: '#fff', zIndex: 1 }}>
-            Please configure the video URL in the widget settings.
-          </span>
+      <div className='video-feed-widget' css={this.getStyle(theme)}>
+        {!expanded && (
+          <>
+            {feeds.length > 1 && (
+              <>
+                <style>{`
+                  .video-feed-widget select option {
+                    background: ${config.dropdownSectionBackgroundColor};
+                    color: ${config.dropdownSectionTextColor};
+                    border-radius: ${config.dropdownSectionBorderRadius}px;
+                  }
+                  .video-feed-widget select option:hover {
+                    color: ${config.dropdownSectionHoverTextColor};
+                  }
+                `}</style>
+                <select
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    left: 10,
+                    zIndex: 2,
+                    background: config.dropdownBackgroundColor,
+                    color: config.dropdownTextColor,
+                    borderRadius: `${config.dropdownBorderRadius}px`,
+                    padding: '4px 24px 4px 8px',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg fill='${encodeURIComponent(config.dropdownArrowColor)}' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4z'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 4px center',
+                    backgroundSize: '12px'
+                  }}
+                  value={current}
+                  onChange={e => this.setState({ current: parseInt(e.target.value) })}
+                >
+                  {feeds.map((f, i) => (
+                    <option key={i} value={i}>{f.name || `Feed ${i + 1}`}</option>
+                  ))}
+                </select>
+              </>
+            )}
+            <button
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                zIndex: 2,
+                background: config.expandButtonBackgroundColor,
+                color: config.expandButtonIconColor,
+                borderRadius: `${config.expandButtonBorderRadius}px`
+              }}
+              onClick={this.toggleExpand}
+            >⛶</button>
+            <video
+              ref={this.videoRef}
+              controls
+              autoPlay
+              muted
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
+            />
+            {feeds.length === 0 && (
+              <span style={{ color: '#fff', zIndex: 1 }}>
+                Please configure at least one video URL in the widget settings.
+              </span>
+            )}
+          </>
+        )}
+
+        {expanded && (
+          <div
+            style={{
+              position: 'fixed',
+              top: '10%',
+              left: '10%',
+              width: '80%',
+              height: '80%',
+              background: config.popupBackgroundColor,
+              zIndex: 1000,
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: `${config.popupGap}px`,
+              padding: `${config.popupPadding}px`,
+              borderRadius: `${config.popupBorderRadius}px`
+            }}
+          >
+            <button
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                zIndex: 1001,
+                background: config.expandButtonBackgroundColor,
+                color: config.expandButtonIconColor,
+                borderRadius: `${config.expandButtonBorderRadius}px`
+              }}
+              onClick={this.toggleExpand}
+            >×</button>
+            {feeds.map((feed, i) => (
+              <video
+                key={i}
+                ref={el => { this.gridVideos[i] = el }}
+                controls
+                autoPlay
+                muted
+                style={{ flex: '1 0 50%', maxHeight: '50%', objectFit: 'cover', padding: `${config.popupItemPadding}px` }}
+              />
+            ))}
+          </div>
         )}
       </div>
     )
