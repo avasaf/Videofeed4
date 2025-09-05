@@ -54,15 +54,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
     if (this.state.expanded && prevProps.config.feeds !== this.props.config.feeds) {
       setTimeout(() => this.setupGridPlayers(), 0)
     }
-
-    if (this.state.expanded && prevProps.config.feeds !== this.props.config.feeds) {
-      setTimeout(() => this.setupGridPlayers(), 0)
-    }
-  }
-
-  componentWillUnmount (): void {
-    this.cleanupPlayer()
-    this.cleanupGrid()
   }
 
   componentWillUnmount (): void {
@@ -351,7 +342,15 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               onClick={this.toggleExpand}
             >×</button>
             {feeds.map((feed, i) => (
-              <div key={i} style={{ padding: `${config.popupItemPadding}px`, overflow: 'hidden', borderRadius: `${config.popupBorderRadius}px`, position: 'relative' }}>
+              <div
+                key={i}
+                style={{
+                  padding: `${config.popupItemPadding}px`,
+                  overflow: 'hidden',
+                  borderRadius: `${config.popupBorderRadius}px`,
+                  position: 'relative'
+                }}
+              >
                 <video
                   ref={el => { this.gridVideos[i] = el }}
                   controls
@@ -359,7 +358,20 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
                   muted
                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
                 />
-                <div style={{ position: 'absolute', top: 10, right: 10, background: config.markerBackgroundColor, color: config.markerTextColor, padding: '4px 8px', borderRadius: `${config.markerBorderRadius}px`, pointerEvents: 'none' }}>{feed.name}</div>
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: config.popupItemPadding + 10,
+                    right: config.popupItemPadding + 10,
+                    background: config.markerBackgroundColor,
+                    color: config.markerTextColor,
+                    padding: '4px 8px',
+                    borderRadius: `${config.markerBorderRadius}px`,
+                    pointerEvents: 'none'
+                  }}
+                >
+                  {feed.name}
+                </div>
               </div>
             ))}
           </div>
