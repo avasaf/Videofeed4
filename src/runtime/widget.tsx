@@ -54,6 +54,15 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
     if (this.state.expanded && prevProps.config.feeds !== this.props.config.feeds) {
       setTimeout(() => this.setupGridPlayers(), 0)
     }
+
+    if (this.state.expanded && prevProps.config.feeds !== this.props.config.feeds) {
+      setTimeout(() => this.setupGridPlayers(), 0)
+    }
+  }
+
+  componentWillUnmount (): void {
+    this.cleanupPlayer()
+    this.cleanupGrid()
   }
 
   componentWillUnmount (): void {
