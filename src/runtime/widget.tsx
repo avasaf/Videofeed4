@@ -86,8 +86,21 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
     if (!url || !videoElement) return
 
     if (url.includes('.m3u8') && Hls.isSupported()) {
-      const hls = new Hls()
-      hls.loadSource(url)
+      const parsed = new URL(url)
+      const qs = parsed.search
+      const baseUrl = `${parsed.origin}${parsed.pathname}`
+      const BaseLoader = Hls.DefaultConfig.loader
+      class QueryLoader extends BaseLoader {
+        load (context, config, callbacks) {
+          if (qs) {
+            const sep = context.url.includes('?') ? '&' : '?'
+            context.url = `${context.url}${sep}${qs.slice(1)}`
+          }
+          super.load(context, config, callbacks)
+        }
+      }
+      const hls = new Hls({ loader: QueryLoader })
+      hls.loadSource(baseUrl)
       hls.attachMedia(videoElement)
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         videoElement.play().catch(() => { console.warn('Browser prevented autoplay.') })
@@ -215,9 +228,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
         color: ${config.dropdownSectionTextColor};
         background-color: transparent;
         border: none;
+        border-radius: ${config.dropdownSectionHoverBorderRadius}px;
         &:hover {
           background-color: ${config.dropdownSectionHoverBackgroundColor};
           color: ${config.dropdownSectionHoverTextColor};
+          border-radius: ${config.dropdownSectionHoverBorderRadius}px;
         }
       }
     `
