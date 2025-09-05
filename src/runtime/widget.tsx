@@ -100,6 +100,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
         }
       })
       hls.loadSource(src)
+
       hls.attachMedia(videoElement)
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         videoElement.play().catch(() => { console.warn('Browser prevented autoplay.') })
