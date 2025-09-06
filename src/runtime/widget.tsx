@@ -320,14 +320,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               height: '90%',
               background: config.popupBackgroundColor,
               zIndex: 1000,
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gridAutoRows: '1fr',
-              gap: `${config.popupGap}px`,
               padding: `${config.popupPadding}px`,
               borderRadius: `${config.popupBorderRadius}px`,
-              boxShadow: `${config.popupBoxShadowOffsetX}px ${config.popupBoxShadowOffsetY}px ${config.popupBoxShadowBlur}px ${config.popupBoxShadowSpread}px ${config.popupBoxShadowColor}`,
-              overflow: 'auto'
+              boxShadow: `${config.popupBoxShadowOffsetX}px ${config.popupBoxShadowOffsetY}px ${config.popupBoxShadowBlur}px ${config.popupBoxShadowSpread}px ${config.popupBoxShadowColor}`
             }}
           >
             <button
@@ -342,39 +337,51 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               }}
               onClick={this.toggleExpand}
             >×</button>
-            {feeds.map((feed, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: `${config.popupItemPadding}px`,
-                  overflow: 'hidden',
-                  borderRadius: `${config.popupBorderRadius}px`,
-                  position: 'relative'
-                }}
-              >
-                <video
-                  ref={el => { this.gridVideos[i] = el }}
-                  controls
-                  autoPlay
-                  muted
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
-                />
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gridAutoRows: '1fr',
+                gap: `${config.popupGap}px`,
+                overflow: 'auto'
+              }}
+            >
+              {feeds.map((feed, i) => (
                 <div
+                  key={i}
                   style={{
-                    position: 'absolute',
-                    top: config.popupItemPadding + 10,
-                    right: config.popupItemPadding + 10,
-                    background: config.markerBackgroundColor,
-                    color: config.markerTextColor,
-                    padding: '4px 8px',
-                    borderRadius: `${config.markerBorderRadius}px`,
-                    pointerEvents: 'none'
+                    padding: `${config.popupItemPadding}px`,
+                    overflow: 'hidden',
+                    borderRadius: `${config.popupBorderRadius}px`,
+                    position: 'relative'
                   }}
                 >
-                  {feed.name}
+                  <video
+                    ref={el => { this.gridVideos[i] = el }}
+                    controls
+                    autoPlay
+                    muted
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: config.popupItemPadding + 10,
+                      right: config.popupItemPadding + 10,
+                      background: config.markerBackgroundColor,
+                      color: config.markerTextColor,
+                      padding: '4px 8px',
+                      borderRadius: `${config.markerBorderRadius}px`,
+                      pointerEvents: 'none'
+                    }}
+                  >
+                    {feed.name}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
