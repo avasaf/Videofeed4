@@ -326,6 +326,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               gap: `${config.popupGap}px`,
               padding: `${config.popupPadding}px`,
               borderRadius: `${config.popupBorderRadius}px`,
+              boxShadow: `${config.popupBoxShadowOffsetX}px ${config.popupBoxShadowOffsetY}px ${config.popupBoxShadowBlur}px ${config.popupBoxShadowSpread}px ${config.popupBoxShadowColor}`,
               overflow: 'auto'
             }}
           >

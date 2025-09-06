@@ -20,6 +20,11 @@
   "popupItemPadding": 0,
   "popupBackgroundColor": "#000000",
   "popupBorderRadius": 0,
+  "popupBoxShadowOffsetX": 0,
+  "popupBoxShadowOffsetY": 4,
+  "popupBoxShadowBlur": 10,
+  "popupBoxShadowSpread": 0,
+  "popupBoxShadowColor": "#00000066",
   "markerBackgroundColor": "#00000099",
   "markerTextColor": "#FFFFFF",
   "markerBorderRadius": 4

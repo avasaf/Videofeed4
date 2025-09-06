@@ -196,6 +196,21 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
             <SettingRow label='Popup Border Radius'>
               <TextInput className='narrow-input' type='number' value={config.popupBorderRadius} onChange={e => { this.onConfigChange('popupBorderRadius', parseInt(e.target.value)) }}/>
             </SettingRow>
+            <SettingRow label='Popup Box Shadow Offset X'>
+              <TextInput className='narrow-input' type='number' value={config.popupBoxShadowOffsetX} onChange={e => { this.onConfigChange('popupBoxShadowOffsetX', parseInt(e.target.value)) }}/>
+            </SettingRow>
+            <SettingRow label='Popup Box Shadow Offset Y'>
+              <TextInput className='narrow-input' type='number' value={config.popupBoxShadowOffsetY} onChange={e => { this.onConfigChange('popupBoxShadowOffsetY', parseInt(e.target.value)) }}/>
+            </SettingRow>
+            <SettingRow label='Popup Box Shadow Blur'>
+              <TextInput className='narrow-input' type='number' value={config.popupBoxShadowBlur} onChange={e => { this.onConfigChange('popupBoxShadowBlur', parseInt(e.target.value)) }}/>
+            </SettingRow>
+            <SettingRow label='Popup Box Shadow Spread'>
+              <TextInput className='narrow-input' type='number' value={config.popupBoxShadowSpread} onChange={e => { this.onConfigChange('popupBoxShadowSpread', parseInt(e.target.value)) }}/>
+            </SettingRow>
+            <SettingRow label='Popup Box Shadow Color'>
+              <ThemeColorPicker value={config.popupBoxShadowColor} onChange={color => { this.onConfigChange('popupBoxShadowColor', color) }}/>
+            </SettingRow>
             <SettingRow label='Marker Background'>
               <ThemeColorPicker value={config.markerBackgroundColor} onChange={color => { this.onConfigChange('markerBackgroundColor', color) }}/>
             </SettingRow>
