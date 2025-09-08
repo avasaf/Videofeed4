@@ -27,6 +27,8 @@ export type IMConfig = ImmutableObject<{
   popupItemPadding: number
   popupBackgroundColor: string
   popupBorderRadius: number
+  popupBlockPage: boolean
+  popupBlockPageColor: string
   popupBoxShadowOffsetX: number
   popupBoxShadowOffsetY: number
   popupBoxShadowBlur: number

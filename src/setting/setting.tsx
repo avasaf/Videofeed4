@@ -196,6 +196,14 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
             <SettingRow label='Popup Border Radius'>
               <TextInput className='narrow-input' type='number' value={config.popupBorderRadius} onChange={e => { this.onConfigChange('popupBorderRadius', parseInt(e.target.value)) }}/>
             </SettingRow>
+            <SettingRow label='Popup Block Page'>
+              <Switch checked={config.popupBlockPage} onChange={e => { this.onConfigChange('popupBlockPage', e.target.checked) }}/>
+            </SettingRow>
+            {config.popupBlockPage && (
+              <SettingRow label='Block Page Color'>
+                <ThemeColorPicker value={config.popupBlockPageColor} onChange={color => { this.onConfigChange('popupBlockPageColor', color) }}/>
+              </SettingRow>
+            )}
             <SettingRow label='Popup Box Shadow Offset X'>
               <TextInput className='narrow-input' type='number' value={config.popupBoxShadowOffsetX} onChange={e => { this.onConfigChange('popupBoxShadowOffsetX', parseInt(e.target.value)) }}/>
             </SettingRow>

@@ -20,6 +20,8 @@
   "popupItemPadding": 0,
   "popupBackgroundColor": "#000000",
   "popupBorderRadius": 0,
+  "popupBlockPage": false,
+  "popupBlockPageColor": "#00000088",
   "popupBoxShadowOffsetX": 0,
   "popupBoxShadowOffsetY": 4,
   "popupBoxShadowBlur": 10,
